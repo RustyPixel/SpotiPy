@@ -1,20 +1,18 @@
-import json
-import requests
+import socket
 
 def getIp():
-
     """
-    gets the ip address
+    Gets the IP address of the local device.
 
     Returns:
-        (str) - The ip address \n
+        str: The IP address of the local device.
     """
-    
-    url = "https://api.ipify.org?format=json"
-
-    #gets the ip
-    response = requests.get(url)
-
-    data = json.loads(response.text)
-
-    return data["ip"]
+    try:
+        # Get the hostname
+        hostname = socket.gethostname()
+        # Get the IP address corresponding to the hostname
+        ip_address = socket.gethostbyname(hostname)
+        return ip_address
+    except Exception as e:
+        print("Error:", e)
+        return None

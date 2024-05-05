@@ -1,77 +1,201 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>SpotiPy</title>
-        <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-    </head>
-    <body>
 
-        <h1 id="title">Loading</h1>
-        <img id="album_image" src="" alt="Album Cover Image" style="display:inline-block; height:70px; visibility:hidden">
+<head>
+    <title>SpotiPy</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 
-        <div style="display:inline-block;">
-            <h2 id="song_name"></h2>
-            <h3 id="artist_name"></h3>
+    <style>
+        html {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        h1 {
+            font-size: 1.0em;
+        }
+
+        h2 {
+            font-size: 1.5em;
+        }
+
+        h3 {
+            font-size: 1.0em;
+        }
+
+        .status {
+            display: flex;
+            flex-direction: column;
+            /* border: 4px dashed green; */
+            /* background-color: gray; */
+            width: 500px;
+            height: 160px;
+            padding: 2px;
+        }
+
+        .status_col {
+            display: flex;
+            flex-direction: row;
+            /* background-color: blue; */
+        }
+
+        .artwork {
+            display: flex;
+            flex-direction: row;
+            /* background-color: red; */
+            padding: 2px;
+            height: 104px;
+        }
+
+        .artwork div {
+            border: 0.5px dashed #ccc;
+            border-radius: 6px;
+        }
+
+        .artwork div img {
+            display: inline-block;
+            height: 104px;
+            width: 104px;
+            visibility: hidden;
+            background-color: yellow;
+            border-radius: 6px;
+
+        }
+
+        .playin {
+            display: flex;
+            flex-direction: column;
+            /* background-color: green; */
+            padding: 2px;
+            height: 104px;
+        }
+
+        .playin div {
+            width: 388px;
+            height: 52px;
+            /* background-color: purple; */
+            background: #F0ECEC;
+            /* border: 1px solid #ccc; */
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .playin .song {
+            border-bottom: 0.5px dashed #ccc;
+        }
+
+        .playin .artist {
+            border-top: 0.5px dashed #ccc;
+        }
+
+        .playin div h2,
+        .playin div h3 {
+            /* animation: scrollText 12s linear infinite; */
+            animation: scrollText 12s linear 1s infinite alternate;
+        }
+
+
+        @keyframes scrollText {
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="status">
+        <div>
+            <h1 id="title">Loading</h1>
         </div>
 
-    </body>
+        <div class="status_col">
+            <div>
+                <div class="artwork">
+                    <div>
+                        <img id="album_image" src="" alt="Album Cover Image">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="playin">
+                    <div class="song">
+                        <h2 id="song_name">Song Name</h2>
+                    </div>
+                    <div class="artist">
+                        <h3 id="artist_name">Artist Name</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
 
 
-    <!-- websocket imports -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
-    
-    <!-- update Song -->
-    <script type="text/javascript" charset="utf-8">
+<!-- websocket imports -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+    integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+    crossorigin="anonymous"></script>
 
-        var socket = io();
+<!-- update Song -->
+<script type="text/javascript" charset="utf-8">
 
-        socket.on('connect', function() {
-            socket.emit('message', { 'room': "{{ 1 }}" });
+    var socket = io();
 
-        });
+    socket.on('connect', function () {
+        socket.emit('message', { 'room': "{{ 1 }}" });
 
-        socket.on('updateSong', function(data) {
+    });
 
-            var albumImage = document.getElementById("album_image");
-            var songName = document.getElementById("song_name");
-            var artistName = document.getElementById("artist_name");
-            var title = document.getElementById("title");
+    socket.on('updateSong', function (data) {
 
-            //if song is playing
-            if(data.data.playing){
-                
-                albumImage.src = data.data.albumUrl;
-                albumImage.style.visibility = "visible";
+        var albumImage = document.getElementById("album_image");
+        var songName = document.getElementById("song_name");
+        var artistName = document.getElementById("artist_name");
+        var title = document.getElementById("title");
 
-                songName.textContent = data.data.songName;
-                artistName.textContent = data.data.artistName;
-                title.textContent = "Currently Playing:";
+        //if song is playing
+        if (data.data.playing) {
+
+            albumImage.src = data.data.albumUrl;
+            albumImage.style.visibility = "visible";
+
+            songName.textContent = data.data.songName;
+            artistName.textContent = data.data.artistName;
+            title.textContent = "Currently Playing:";
 
             //if no song playing 
-            }else if(data.data.playing == false){
+        } else if (data.data.playing == false) {
 
-                albumImage.src = "";
-                albumImage.style.visibility = "hidden";
+            albumImage.src = "";
+            albumImage.style.visibility = "hidden";
 
-                songName.textContent = "";
-                artistName.textContent = "";
-                title.textContent = "Nothing is currently playing.";
-            
+            songName.textContent = "";
+            artistName.textContent = "";
+            title.textContent = "Nothing is currently playing.";
+
             //error getting song
-            }else{
+        } else {
 
-                albumImage.src = "";
-                albumImage.style.visibility = "hidden";
+            albumImage.src = "";
+            albumImage.style.visibility = "hidden";
 
-                songName.textContent = "";
-                artistName.textContent = "";
-                title.textContent = "Could not get currently playing song.";
+            songName.textContent = "";
+            artistName.textContent = "";
+            title.textContent = "Could not get currently playing song.";
 
-            }
-            
-        });
+        }
 
-    </script>
+    });
 
+</script>
 
 </html>

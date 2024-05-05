@@ -1,10 +1,86 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Authorise App</title>
-        <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-    </head>
-    <body>
-        <p>Click <a href="{{ authUrl }}" rel="noopener noreferrer">here</a> to authorise the app.</p>
-    </body>
+
+<head>
+    <title>Authorise App</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        body {
+            margin: 0;
+            /* Remove default body margin */
+        }
+
+        html {
+            font-family: Arial, Helvetica, sans-serif;
+            /* display: inline-block; */
+            text-align: center;
+        }
+
+        section {
+            padding: 0 20% 2em;
+            /* Set padding for top, right, bottom, and left sides */
+        }
+
+        section h1 {
+            background: linear-gradient(to bottom right, #000000, #4e4d4d);
+            /* Apply gradient background to 'h1' within 'section' */
+            color: white;
+            /* Set text color to white */
+            font-size: 2.0em;
+            /* Set font size for 'h1' */
+            margin: 0 -33.33% 1em;
+            /* Set margin for top, right, and bottom sides */
+            overflow: hidden;
+            /* Hide any overflowing content */
+            padding: 1em 33.33%;
+            /* Set padding for top and bottom sides */
+        }
+
+        /* Styling for auth scene button */
+        #auth button {
+            border: none;
+            /* Remove border */
+            color: #FEFCFB;
+            /* Set text color */
+            background-color: #034078;
+            /* Set background color */
+            padding: 15px 15px;
+            /* Set padding for top and bottom, left and right */
+            text-align: center;
+            /* Center-align text */
+            text-decoration: none;
+            /* Remove text decoration */
+            display: inline-block;
+            /* Display as inline-block */
+            font-size: 16px;
+            /* Set font size */
+            width: 120px;
+            /* Set width */
+            margin-top: 20px;
+            /* Set top margin */
+            margin-right: 10px;
+            /* Set right margin */
+            border-radius: 4px;
+            /* Apply border-radius for rounded corners */
+            transition-duration: 0.4s;
+            /* Set transition duration for smooth effects */
+        }
+
+        /* auth Scene Button */
+        #auth button:hover {
+            background-color: #1282A2;
+            /* Change background color on hover */
+        }
+    </style>
+</head>
+
+<body>
+    <section id="auth">
+        <h1>Click to authorise the app.</h1>
+        <a href="{{ authUrl }}" rel="noopener noreferrer">
+            <button type="submit">Authorise</button>
+        </a>
+    </section>
+</body>
+
 </html>

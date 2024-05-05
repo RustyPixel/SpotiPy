@@ -51,7 +51,9 @@ def getCurrentSong(accessToken):
             currentPlay["songName"] = data['item']['name']
 
             #get song artist
-            currentPlay["artistName"] = data['item']['artists'][0]['name']
+            # list all the artisits
+            artists = data['item']['artists']
+            currentPlay["artistName"] = ', '.join([artist['name'] for artist in artists])
 
             #get the album ID 
             currentPlay["albumId"] = data['item']['album']['id']

@@ -33,7 +33,7 @@ def getSpotifyAccessToken(authCode, refreshToken):
     }
 
     data = {
-        "redirect_uri": f"http://{os.getenv('IP')}:8000/callback"
+        "redirect_uri": f"http://{os.getenv('IP')}:{os.getenv('PORT')}/callback"
     }
     
     if authCode is not None:

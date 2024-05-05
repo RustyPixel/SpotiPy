@@ -17,10 +17,17 @@ thread_lock = threading.Lock()
 
 # set logging level
 log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
+log.setLevel(logging.DEBUG)
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 socketio = SocketIO(app)
+
+# Get host and port from environment variables
+HOST = os.environ.get('IP', '0.0.0.0')
+PORT = int(os.environ.get('PORT', '8000'))
 
 @app.route("/")
 def index():
@@ -88,11 +95,17 @@ def initialize_app_variables():
     # reloads .env file
     load_dotenv()
 
-    # if ip not set
-    if not 'IP' in os.environ:
-
-        # add ip to enviroment
+    # if IP not set
+    if 'IP' not in os.environ:
+        # add IP to environment
         updateEnvVar("IP", getIp())
+
+    # if PORT not set
+    if 'PORT' not in os.environ:
+        # set PORT to default value 8000
+        os.environ['PORT'] = '8000'
+        # add PORT to environment
+        updateEnvVar("PORT", '8000')
 
     current_app.config['workers'] = {}
 
@@ -136,5 +149,5 @@ def handle_message(data):
 
 if __name__ == "__main__":
 
-    app.run(host="0.0.0.0", port=8000)
+    app.run(host=HOST, port=PORT)
     socketio.run(app)

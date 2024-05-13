@@ -2,7 +2,7 @@ import requests
 import base64
 import os
 
-def getSpotifyAccessToken(authCode, refreshToken):
+def get_spotify_access_token(authCode, refreshToken):
 
     """
     gets the users access and refresh token

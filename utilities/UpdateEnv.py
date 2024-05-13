@@ -1,28 +1,25 @@
-
 import os
 import dotenv
 
-def updateEnvVar(varName, newValue):
-
+def update_env_var(var_name, new_value):
     """
-    updates an enviroment variable
+    Updates an environment variable.
 
     Args:
-        variable_ name (str): the name of the variable \n
-        variable_value (str): the value of the vaiable \n
+        var_name (str): The name of the variable.
+        new_value (str): The value of the variable.
 
     Returns:
-        (bool) - true \n
+        bool: True if successful.
     """
-    
-    #gets .env file 
+    # Finds and loads .env file
     dotenv_file = dotenv.find_dotenv()
     dotenv.load_dotenv(dotenv_file)
 
-    #updates enviroment variable
-    os.environ[varName] = newValue
+    # Updates environment variable
+    os.environ[var_name] = new_value
 
-    #adds or Updates a key/value
-    dotenv.set_key(dotenv_file, varName, os.environ[varName])
+    # Adds or updates a key/value
+    dotenv.set_key(dotenv_file, var_name, os.environ[var_name])
 
     return True

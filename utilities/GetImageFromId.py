@@ -1,38 +1,34 @@
-
 import dotenv
 import requests
 import json
 import urllib.parse
 
-
-def GetImageFromId(albumId, accessToken):
-
+def get_image_from_id(album_id, access_token):
     """
-    gets the album image from its id
+    Gets the album image from its ID.
 
     Args:
-        album_id: (str) - the album id \n
-        access_token: (str) - the users access token \n
+        album_id (str): The album ID.
+        access_token (str): The user's access token.
 
     Returns:
-        (str) - the image url \n
+        str: The image URL.
     """
-    
-    #gets .env file 
+    # Finds and loads .env file
     dotenv_file = dotenv.find_dotenv()
     dotenv.load_dotenv(dotenv_file)
 
-    #general headers for api
+    # General headers for API
     headers = {
-        "Authorization": f"Bearer {accessToken}",
+        "Authorization": f"Bearer {access_token}",
         'Content-Type': 'application/json'
     }
 
-    #send request to spotify api
-    albumResponse = requests.get(f'https://api.spotify.com/v1/albums/{albumId}', headers=headers)
+    # Send request to Spotify API
+    album_response = requests.get(f'https://api.spotify.com/v1/albums/{album_id}', headers=headers)
 
-    #load the response data to json
-    albumData = json.loads(albumResponse.text)
+    # Load the response data to JSON
+    album_data = json.loads(album_response.text)
 
     # Alternative SVG image
     alternative_svg = '''<?xml version="1.0" standalone="no"?>
@@ -74,12 +70,12 @@ fill="#000000" stroke="none">
 
     # Encode the SVG image as a data URI
     encoded_svg = urllib.parse.quote(alternative_svg)
-    imageUrl = 'data:image/svg+xml,' + encoded_svg
+    image_url = 'data:image/svg+xml,' + encoded_svg
 
     # Check if 'images' key exists and is not empty
-    if 'images' in albumData and albumData['images']:
-        #gets image url from data
+    if 'images' in album_data and album_data['images']:
+        # Gets image URL from data
         # Get the first image URL from the list
-        imageUrl = albumData['images'][0]['url']
+        image_url = album_data['images'][0]['url']
 
-    return imageUrl
+    return image_url

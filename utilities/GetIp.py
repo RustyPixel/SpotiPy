@@ -1,6 +1,6 @@
 import socket
 
-def getIp():
+def get_ip():
     """
     Gets the IP address of the local device.
 

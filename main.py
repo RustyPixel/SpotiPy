@@ -1,151 +1,102 @@
 from flask import Flask, render_template, request, redirect, send_from_directory, make_response, current_app
 from flask_socketio import SocketIO, emit
 import logging
+from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
-
-import threading
 import os
 
-from utilities.GetIp import getIp
-from utilities.UpdateEnv  import updateEnvVar
-from utilities.GenerateAuthUrl  import GenerateAuthUrl
-from utilities.UpdateSongClass  import Worker
-from utilities.UpdateAccessToken import UpdateAccessToken
+from utilities.GetIp import get_ip  # Importing function to get IP address
+from utilities.UpdateEnv import update_env_var  # Importing function to update environment variables
+from utilities.GenerateAuthUrl import generate_auth_url  # Importing function to generate authentication URL
+from utilities.UpdateSongClass import Worker  # Importing Worker class to update song
+from utilities.UpdateAccessToken import update_access_token  # Importing function to update access token
 
-thread = None
-thread_lock = threading.Lock()
+# Set up the root logger
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.DEBUG)
 
-# set logging level
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.DEBUG)
+# Configure logging to file
+log_file = 'app.log'
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024 * 10, backupCount=10)
+file_handler.setFormatter(formatter)
+
+# Configure logging to console
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(formatter)
+
+# Set up logging to console based on a configuration flag
+log_to_console = True  # Set to False to turn off logging to console
+
+if log_to_console:
+    root_logger.addHandler(console_handler)
+
+# Set up logging to file based on a configuration flag
+log_to_file = False  # Set to False to turn off logging to file
+
+if log_to_file:
+    root_logger.addHandler(file_handler)
+
+app = Flask(__name__)
+socketio = SocketIO(app, async_mode='gevent')  # Set async_mode to 'gevent'
 
 # Load environment variables from .env file
 load_dotenv()
 
-app = Flask(__name__)
-socketio = SocketIO(app)
-
-# Get host and port from environment variables
 HOST = os.environ.get('IP', '0.0.0.0')
 PORT = int(os.environ.get('PORT', '8000'))
 
 @app.route("/")
 def index():
-
-    # reloads .env file
     load_dotenv()
-
-    # if access token is pressent
     if "AT" in os.environ:
-
-        renderedTemplate = render_template("index.html", currentlyPlaying={})
-
-        response = make_response(renderedTemplate)
-
-
-    # if access token doesnt exist
+        return render_template("index.html", currentlyPlaying={})  # Render index.html template
     else:
-        response = make_response(redirect("/auth-app"))
-        
-
-    return response
-    
-
+        return redirect("/auth-app")  # Redirect to authentication page if access token is not present
 
 @app.route("/auth-app")
-def authApp():
-
-    # generate authentication url for spotify app
-    authUrl = GenerateAuthUrl()
-
-    # return auth page
-    return render_template("authApp.html",authUrl=authUrl)
-
-
-
+def auth_app():
+    auth_url = generate_auth_url()  # Generate authentication URL
+    return render_template("authApp.html", authUrl=auth_url)  # Render authApp.html template with auth URL
 
 @app.route("/callback")
 def callback():
-
-    # reloads .env file
     load_dotenv()
+    auth_code = request.args.get("code")  # Get authorization code from callback
+    update_access_token(auth_code, None)  # Update access token using authorization code
+    return redirect("/")  # Redirect to root URL
 
-    # Extract the authorization code from the callback URL
-    authCode = request.args.get("code")
-
-    # get users access token
-    UpdateAccessToken(authCode, None)
-
-    # redirect to main page
-    response = make_response(redirect("/"))
-
-    return response
-
-
-# return favicon so cloudflare is happy
 @app.route("/favicon.ico")
 def favicon():
     return send_from_directory(os.path.join(app.root_path, "static/images"), "SpotiPy.ico", mimetype='image/vnd.microsoft.icon')
 
-
-# initialise workers dictionary
 @app.before_first_request
 def initialize_app_variables():
-    
-    # reloads .env file
     load_dotenv()
-
-    # if IP not set
     if 'IP' not in os.environ:
-        # add IP to environment
-        updateEnvVar("IP", getIp())
-
-    # if PORT not set
+        update_env_var("IP", get_ip())  # Update IP environment variable if not present
     if 'PORT' not in os.environ:
-        # set PORT to default value 8000
         os.environ['PORT'] = '8000'
-        # add PORT to environment
-        updateEnvVar("PORT", '8000')
+        update_env_var("PORT", '8000')  # Update PORT environment variable if not present
+    current_app.config['workers'] = {}  # Initialize workers dictionary in app configuration
 
-    current_app.config['workers'] = {}
-
-
-# on websocket connection
 @socketio.on('connect')
 def test_connect(auth):
-    emit('my response', {'data': 'Connected'})
+    emit('my response', {'data': 'Connected'})  # Emit 'my response' event on connection
 
-# on websocket disconnection
 @socketio.on('disconnect')
 def test_disconnect():
-
-    # get sid from socket
-    sid = request.sid
-
-    # stop background proccess
+    sid = request.sid  # Get session ID
     if "workers" in current_app.config and sid in current_app.config['workers']:
-        current_app.config['workers'][sid].stop()
+        current_app.config['workers'][sid].stop()  # Stop worker associated with session ID on disconnection
 
-
-
-# on websocket message
 @socketio.on("message")
 def handle_message(data):
-
-    # get spocketId
-    sid = request.sid
-
-    # import class from 
-    worker = Worker(socketio)
-
-    # start backgrouund process
-    socketio.start_background_task(worker.UpdateSong, current_app._get_current_object(), socketio)
-
-    # add worker to enviroment
+    sid = request.sid  # Get session ID
+    worker = Worker(socketio)  # Create Worker instance
+    socketio.start_background_task(worker.update_song, current_app._get_current_object(), socketio)  # Start background task to update song
     if "workers" in current_app.config:
-        current_app.config['workers'][sid] = worker
-
-
+        current_app.config['workers'][sid] = worker  # Add worker to workers dictionary
 
 if __name__ == "__main__":
-    socketio.run(app, host=HOST, port=PORT)
+    socketio.run(app, host=HOST, port=PORT)  # Run the application with SocketIO

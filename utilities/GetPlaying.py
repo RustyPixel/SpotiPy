@@ -2,81 +2,76 @@ import requests
 import os
 import json
 from dotenv import load_dotenv
-from .GetImageFromId import GetImageFromId
-from .UpdateAccessToken import UpdateAccessToken
+from .GetImageFromId import get_image_from_id
+from .UpdateAccessToken import update_access_token
 
-def getCurrentSong(accessToken):
-
+def get_current_song(access_token):
     """
-    gets the currently playing song
+    Gets the currently playing song.
 
     Args:
-        access_token: (str) - the users access token
+        access_token (str): The user's access token.
 
     Returns:
-        dict: {
-            playing: (bool) - playing status \n
-            songName: (str) - the song title \n
-            artistName: (str) - the artists name \n
-            albumId: (str) - the album id \n 
-            albumUrl: (str) - the album image url \n
-            error: (bool) - error status \n
-        }
+        dict: Dictionary containing song information:
+            {
+                playing (bool): Playing status.
+                song_name (str): The song title.
+                artist_name (str): The artists' names.
+                album_id (str): The album ID.
+                album_url (str): The album image URL.
+                error (bool): Error status.
+            }
     """
-    
     load_dotenv()
 
-    currentPlay = {}
+    current_play = {}
 
     url = "https://api.spotify.com/v1/me/player/currently-playing"
 
     headers = {
-        "Authorization": f"Bearer {accessToken}",
+        "Authorization": f"Bearer {access_token}",
         'Content-Type': 'application/json'
     }
 
-    #gets currently playing song
+    # Gets currently playing song
     response = requests.get(url, headers=headers)
     
     if response.status_code == 200:
-
         data = json.loads(response.text)
 
-        #if sog currently playing
+        # If song is currently playing
         if data['is_playing']:
+            current_play["playing"] = True
 
-            currentPlay["playing"] = True
+            # Get song name
+            current_play["songName"] = data['item']['name']
 
-            #get song name
-            currentPlay["songName"] = data['item']['name']
-
-            #get song artist
-            # list all the artisits
+            # Get song artist
+            # List all the artists
             artists = data['item']['artists']
-            currentPlay["artistName"] = ', '.join([artist['name'] for artist in artists])
+            current_play["artistName"] = ', '.join([artist['name'] for artist in artists])
 
             #get the album ID 
-            currentPlay["albumId"] = data['item']['album']['id']
+            current_play["albumId"] = data['item']['album']['id']
 
-            #get album url
-            currentPlay["albumUrl"] = GetImageFromId(currentPlay["albumId"], accessToken)
-
-
-
-        
-        #if not
-        else:
-            currentPlay["playing"] = False       
+            # Get album URL
+            current_play["albumUrl"] = get_image_from_id(current_play["albumId"], access_token)
     
-    #if access token revoked
+        # If not playing
+        else:
+            current_play["playing"] = False       
+    
+    # If access token revoked
     elif response.status_code == 401:
-
-        Tokens = UpdateAccessToken(None, os.getenv('RT')) 
-
-        return getCurrentSong(Tokens["AT"])
+        tokens = update_access_token(None, os.getenv('RT')) 
+        return get_current_song(tokens["AT"])
 
     else:
-        currentPlay["error"] = True
+        current_play["error"] = True
+
+    return current_play
 
 
-    return currentPlay
+
+

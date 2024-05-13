@@ -148,6 +148,4 @@ def handle_message(data):
 
 
 if __name__ == "__main__":
-
-    app.run(host=HOST, port=PORT)
-    socketio.run(app)
+    socketio.run(app, host=HOST, port=PORT)

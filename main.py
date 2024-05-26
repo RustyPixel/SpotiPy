@@ -13,7 +13,7 @@ from utilities.UpdateAccessToken import update_access_token  # Importing functio
 
 # Set up the root logger
 root_logger = logging.getLogger()
-root_logger.setLevel(logging.DEBUG)
+root_logger.setLevel(logging.INFO) # DEBUG or INFO
 
 # Configure logging to file
 log_file = 'app.log'
@@ -98,5 +98,17 @@ def handle_message(data):
     if "workers" in current_app.config:
         current_app.config['workers'][sid] = worker  # Add worker to workers dictionary
 
+def wait_for_enter():
+    input(f"Press Enter to shutdown server...\n\n")
+    shutdown_server()
+
+def shutdown_server():
+    print("Shutting down server...")
+    socketio.stop()
+    print("Server shutdown complete.")
+    os._exit(0)  # Use os._exit() to force exit without cleanup
+
 if __name__ == "__main__":
+    print(f"\nhttp://{HOST}:{PORT}\n")
+    threading.Thread(target=wait_for_enter).start()
     socketio.run(app, host=HOST, port=PORT)  # Run the application with SocketIO

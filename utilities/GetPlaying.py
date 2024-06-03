@@ -55,6 +55,12 @@ def get_current_song(access_token):
             #get the album ID 
             current_play["albumId"] = data['item']['album']['id']
 
+            #get the song Progress 
+            current_play["songProgress"] = data['progress_ms']
+
+            #get the song Length 
+            current_play["songLength"] = data['item']['duration_ms']
+
             # Get album URL
             current_play["albumUrl"] = get_image_from_id(current_play["albumId"], access_token)
     

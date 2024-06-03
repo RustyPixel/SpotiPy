@@ -1,0 +1,463 @@
+<!-- Template inspired from Thomas Moran - 
+    https://thomasmoran.dev/snippets/spotify-currently-playing/spotify-currently-playing/ -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SpotiPy</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+
+    <style>
+        :root {
+            --fontFamily-sans: "Nunito", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            --font-body: var(--fontFamily-sans);
+            --font-heading: var(--fontFamily-sans);
+        }
+
+        body,
+        html {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale
+        }
+
+        html {
+            font-size: 18px;
+            line-height: 1.5;
+        }
+
+        body {
+            text-rendering: optimizeLegibility;
+            background-color: #fff;
+            ;
+            color: #323232;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        h5,
+        h6 {
+            text-rendering: optimizeLegibility;
+            color: #323232;
+            font-family: var(--font-heading);
+            letter-spacing: -.025em;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            margin-top: 4rem;
+        }
+
+        h5 {
+            font-size: 1.2rem;
+        }
+
+        .spotify {
+            width: 48rem;
+        }
+
+        .spotify__title {
+            align-items: center;
+            display: flex;
+            margin-bottom: 2.5rem;
+            margin-top: 0px;
+        }
+
+        .spotify__main {
+            align-items: center;
+            display: flex;
+            /* justify-content: center; */
+            margin-left: 20px;
+        }
+
+        .spotify__title svg {
+            margin-right: 0.5rem;
+            margin-bottom: 4px;
+        }
+
+        .spotify__image {
+            position: relative;
+            margin: 0 1.25rem;
+            padding-right: 3rem;
+        }
+
+        .spotify__logo {
+            height: 147px;
+            width: 147px;
+        }
+
+        .spotify__logo path {
+            /* fill: #e8f8ee; */
+            fill: #c4fcd9;
+        }
+
+        .spotify__record {
+            height: 110px;
+            width: 110px;
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+        }
+
+        .spotify__details h6 {
+            margin: 0;
+        }
+
+        .spotify__details p {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+        }
+
+        @media screen and (max-width: 600px) {
+            .spotify__main {
+                flex-direction: column;
+            }
+
+            .spotify__details {
+                text-align: center;
+            }
+
+            .spotify__image {
+                margin-bottom: 2.5rem;
+            }
+        }
+
+        .record {
+            position: relative;
+            height: 110px;
+            width: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: #323232;
+            background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.125), rgba(255, 255, 255, 0) 70%),
+                linear-gradient(-48deg, rgba(255, 255, 255, 0) 45%, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0) 55%),
+                linear-gradient(-42deg, rgba(255, 255, 255, 0) 45%, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0) 55%),
+                radial-gradient(circle at top left, rgba(0, 0, 0, 1) 20%, rgba(0, 0, 0, 0) 80%),
+                radial-gradient(circle at bottom right, rgba(0, 0, 0, 1) 20%, rgba(0, 0, 0, 0) 80%);
+            animation: rotate 5s linear infinite;
+        }
+
+        .record--stopped {
+            animation: none;
+        }
+
+        .record__center__black {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            margin: auto;
+            height: 16px;
+            width: 16px;
+            background-color: #323232;
+            border-radius: 50%;
+        }
+
+        .record__center__white {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            margin: auto;
+            height: 6px;
+            width: 6px;
+            background-color: #fff;
+            ;
+            border-radius: 50%;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotateZ(0deg);
+            }
+
+            to {
+                transform: rotateZ(360deg);
+            }
+        }
+
+        .sw--pause line {
+            animation: none !important;
+        }
+
+        .sw line {
+            transform-origin: center;
+            stroke: #dedede;
+            transition: stroke 1s ease-in-out;
+            animation: sound 0.4s linear infinite alternate;
+        }
+
+        .sw line.sw__full {
+            stroke: #1db954;
+        }
+
+        @media screen and (max-width: 600px) {
+            .sw>svg {
+                width: 100%;
+            }
+        }
+
+        @keyframes sound {
+            0% {
+                transform: scaleY(0.4);
+            }
+
+            100% {
+                transform: scaleY(1);
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="spotify">
+        <h5 class="spotify__title"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                <path
+                    d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z">
+                </path>
+            </svg> Currently Playing</h5>
+        <div class="spotify__main">
+            <div class="spotify__image">
+                <div class="spotify__logo"><svg viewBox="0 0 147 147" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M73.5 0C32.9268 0 0 32.9268 0 73.5C0 114.073 32.9268 147 73.5 147C114.073 147 147 114.073 147 73.5C147 32.9268 114.073 0 73.5 0ZM103.345 108.146C102.1 108.146 101.329 107.76 100.173 107.079C81.6798 95.9353 60.1633 95.4611 38.9135 99.8177C37.7577 100.114 36.2462 100.588 35.3867 100.588C32.5119 100.588 30.704 98.3062 30.704 95.9056C30.704 92.853 32.5119 91.4008 34.7347 90.9266C59.0075 85.5623 83.8137 86.0365 104.975 98.6915C106.782 99.8474 107.849 100.885 107.849 103.582C107.849 106.279 105.745 108.146 103.345 108.146V108.146ZM111.317 88.7038C109.776 88.7038 108.738 88.0222 107.672 87.4591C89.1484 76.4933 61.5266 72.0774 36.9575 78.7458C35.5349 79.131 34.7643 79.5163 33.4306 79.5163C30.2595 79.5163 27.681 76.9379 27.681 73.7667C27.681 70.5956 29.2222 68.4913 32.2748 67.6319C40.5139 65.3202 48.9308 63.6012 61.2599 63.6012C80.4944 63.6012 99.0768 68.3728 113.718 77.0861C116.118 78.5087 117.067 80.3462 117.067 82.9246C117.037 86.1254 114.547 88.7038 111.317 88.7038V88.7038ZM120.504 66.1204C118.963 66.1204 118.015 65.7351 116.681 64.9645C95.5796 52.3687 57.8516 49.3458 33.4306 56.1623C32.3637 56.4587 31.03 56.9329 29.6075 56.9329C25.6954 56.9329 22.702 53.8802 22.702 49.9385C22.702 45.9079 25.1915 43.6258 27.8589 42.8552C38.2911 39.8026 49.9681 38.3504 62.6825 38.3504C84.3175 38.3504 106.99 42.8552 123.557 52.5169C125.869 53.8506 127.38 55.6881 127.38 59.2149C127.38 63.2456 124.12 66.1204 120.504 66.1204V66.1204Z"
+                            fill="#20CF5E"></path>
+                    </svg></div>
+                <div class="spotify__record">
+                    <div class="record record--stopped"><span class="record__center__black"></span><span
+                            class="record__center__white"></span></div>
+                </div>
+            </div>
+            <div class="spotify__details" itemscope="" itemtype="https://schema.org/MusicGroup">
+                <div itemprop="track" itemscope="" itemtype="https://schema.org/MusicRecording">
+                    <h6 itemprop="name"></h6>
+                </div>
+                <p itemprop="name">Not Playing</p>
+                <div class="sw sw--pause"><svg width="302" height="28" viewBox="0 0 344 28" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <line class="" x1="7" y1="8" x2="7" y2="20" stroke-width="2" style="animation-duration: 721ms;">
+                        </line>
+                        <line class="" x1="14" y1="8" x2="14" y2="20" stroke-width="2"
+                            style="animation-duration: 733ms;"></line>
+                        <line class="" x1="21" y1="8" x2="21" y2="20" stroke-width="2"
+                            style="animation-duration: 707ms;"></line>
+                        <line class="" x1="28" y1="8" x2="28" y2="20" stroke-width="2"
+                            style="animation-duration: 600ms;"></line>
+                        <line class="" x1="35" y1="8" x2="35" y2="20" stroke-width="2"
+                            style="animation-duration: 357ms;"></line>
+                        <line class="" x1="42" y1="8" x2="42" y2="20" stroke-width="2"
+                            style="animation-duration: 681ms;"></line>
+                        <line class="" x1="49" y1="8" x2="49" y2="20" stroke-width="2"
+                            style="animation-duration: 753ms;"></line>
+                        <line class="" x1="56" y1="8" x2="56" y2="20" stroke-width="2"
+                            style="animation-duration: 674ms;"></line>
+                        <line class="" x1="63" y1="8" x2="63" y2="20" stroke-width="2"
+                            style="animation-duration: 795ms;"></line>
+                        <line class="" x1="70" y1="8" x2="70" y2="20" stroke-width="2"
+                            style="animation-duration: 507ms;"></line>
+                        <line class="" x1="77" y1="8" x2="77" y2="20" stroke-width="2"
+                            style="animation-duration: 562ms;"></line>
+                        <line class="" x1="84" y1="8" x2="84" y2="20" stroke-width="2"
+                            style="animation-duration: 387ms;"></line>
+                        <line class="" x1="91" y1="8" x2="91" y2="20" stroke-width="2"
+                            style="animation-duration: 616ms;"></line>
+                        <line class="" x1="98" y1="8" x2="98" y2="20" stroke-width="2"
+                            style="animation-duration: 757ms;"></line>
+                        <line class="" x1="105" y1="8" x2="105" y2="20" stroke-width="2"
+                            style="animation-duration: 499ms;"></line>
+                        <line class="" x1="112" y1="8" x2="112" y2="20" stroke-width="2"
+                            style="animation-duration: 428ms;"></line>
+                        <line class="" x1="119" y1="8" x2="119" y2="20" stroke-width="2"
+                            style="animation-duration: 419ms;"></line>
+                        <line class="" x1="126" y1="8" x2="126" y2="20" stroke-width="2"
+                            style="animation-duration: 759ms;"></line>
+                        <line class="" x1="133" y1="8" x2="133" y2="20" stroke-width="2"
+                            style="animation-duration: 777ms;"></line>
+                        <line class="" x1="140" y1="8" x2="140" y2="20" stroke-width="2"
+                            style="animation-duration: 489ms;"></line>
+                        <line class="" x1="147" y1="8" x2="147" y2="20" stroke-width="2"
+                            style="animation-duration: 331ms;"></line>
+                        <line class="" x1="154" y1="8" x2="154" y2="20" stroke-width="2"
+                            style="animation-duration: 387ms;"></line>
+                        <line class="" x1="161" y1="8" x2="161" y2="20" stroke-width="2"
+                            style="animation-duration: 363ms;"></line>
+                        <line class="" x1="168" y1="8" x2="168" y2="20" stroke-width="2"
+                            style="animation-duration: 672ms;"></line>
+                        <line class="" x1="175" y1="8" x2="175" y2="20" stroke-width="2"
+                            style="animation-duration: 691ms;"></line>
+                        <line class="" x1="182" y1="8" x2="182" y2="20" stroke-width="2"
+                            style="animation-duration: 480ms;"></line>
+                        <line class="" x1="189" y1="8" x2="189" y2="20" stroke-width="2"
+                            style="animation-duration: 790ms;"></line>
+                        <line class="" x1="196" y1="8" x2="196" y2="20" stroke-width="2"
+                            style="animation-duration: 676ms;"></line>
+                        <line class="" x1="203" y1="8" x2="203" y2="20" stroke-width="2"
+                            style="animation-duration: 763ms;"></line>
+                        <line class="" x1="210" y1="8" x2="210" y2="20" stroke-width="2"
+                            style="animation-duration: 526ms;"></line>
+                        <line class="" x1="217" y1="8" x2="217" y2="20" stroke-width="2"
+                            style="animation-duration: 300ms;"></line>
+                        <line class="" x1="224" y1="8" x2="224" y2="20" stroke-width="2"
+                            style="animation-duration: 416ms;"></line>
+                        <line class="" x1="231" y1="8" x2="231" y2="20" stroke-width="2"
+                            style="animation-duration: 496ms;"></line>
+                        <line class="" x1="238" y1="8" x2="238" y2="20" stroke-width="2"
+                            style="animation-duration: 700ms;"></line>
+                        <line class="" x1="245" y1="8" x2="245" y2="20" stroke-width="2"
+                            style="animation-duration: 754ms;"></line>
+                        <line class="" x1="252" y1="8" x2="252" y2="20" stroke-width="2"
+                            style="animation-duration: 349ms;"></line>
+                        <line class="" x1="259" y1="8" x2="259" y2="20" stroke-width="2"
+                            style="animation-duration: 666ms;"></line>
+                        <line class="" x1="266" y1="8" x2="266" y2="20" stroke-width="2"
+                            style="animation-duration: 634ms;"></line>
+                        <line class="" x1="273" y1="8" x2="273" y2="20" stroke-width="2"
+                            style="animation-duration: 759ms;"></line>
+                        <line class="" x1="280" y1="8" x2="280" y2="20" stroke-width="2"
+                            style="animation-duration: 453ms;"></line>
+                        <line class="" x1="287" y1="8" x2="287" y2="20" stroke-width="2"
+                            style="animation-duration: 390ms;"></line>
+                        <line class="" x1="294" y1="8" x2="294" y2="20" stroke-width="2"
+                            style="animation-duration: 526ms;"></line>
+                        <line class="" x1="301" y1="8" x2="301" y2="20" stroke-width="2"
+                            style="animation-duration: 744ms;"></line>
+                        <line class="" x1="308" y1="8" x2="308" y2="20" stroke-width="2"
+                            style="animation-duration: 670ms;"></line>
+                        <line class="" x1="315" y1="8" x2="315" y2="20" stroke-width="2"
+                            style="animation-duration: 657ms;"></line>
+                        <line class="" x1="322" y1="8" x2="322" y2="20" stroke-width="2"
+                            style="animation-duration: 503ms;"></line>
+                        <line class="" x1="329" y1="8" x2="329" y2="20" stroke-width="2"
+                            style="animation-duration: 692ms;"></line>
+                        <line class="" x1="336" y1="8" x2="336" y2="20" stroke-width="2"
+                            style="animation-duration: 624ms;"></line>
+                        <line class="" x1="343" y1="8" x2="343" y2="20" stroke-width="2"
+                            style="animation-duration: 490ms;"></line>
+                        <line class="" x1="350" y1="8" x2="350" y2="20" stroke-width="2"></line>
+                    </svg></div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<!-- websocket imports -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+    integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+    crossorigin="anonymous"></script>
+
+<!-- update Song -->
+<script type="text/javascript" charset="utf-8">
+
+    var socket = io();
+    let songLength = 0;
+    let songProgress = 0;
+    let progressBarInterval;
+
+    socket.on('connect', function () {
+        socket.emit('message', { 'room': "1" });
+    });
+
+    socket.on('updateSong', function (data) {
+        var albumArt = document.querySelector(".spotify__record .record");
+        var songName = document.querySelector(".spotify__details h6");
+        var artistName = document.querySelector(".spotify__details p");
+        var titleText = document.querySelector(".spotify__title").childNodes[1];
+
+        if (data.data.playing) {
+            albumArt.style.backgroundImage = `url(${data.data.albumUrl})`;
+            albumArt.style.backgroundSize = 'cover';
+            albumArt.classList.remove('record--stopped');
+
+            songName.textContent = data.data.songName;
+            artistName.textContent = data.data.artistName;
+
+            titleText.textContent = " Currently Playing";
+
+            songLength = data.data.songLength;
+            songProgress = data.data.songProgress;
+
+            // Start the progress bar if not already started
+            if (!progressBarInterval) {
+                startProgressBar();
+            }
+        } else if (data.data.playing === false) {
+            albumArt.style.backgroundImage = "";
+            albumArt.classList.add('record--stopped');
+
+            songName.textContent = "";
+            artistName.textContent = "Not Playing";
+
+            titleText.textContent = " Nothing is currently playing.";
+
+            resetProgressBar();
+        } else {
+            albumArt.style.backgroundImage = "";
+            albumArt.classList.add('record--stopped');
+
+            songName.textContent = "";
+            artistName.textContent = "Not Playing";
+
+            titleText.textContent = " Could not get currently playing song.";
+
+            resetProgressBar();
+        }
+    });
+
+    function updateProgressBar() {
+        const progressBar = document.querySelector('.sw.sw--pause');
+        songProgress += 1000; // Increment progress by 1 second (1000 milliseconds)
+        const progressPercentage = (songProgress / songLength) * 100;
+        updateLines(progressPercentage);
+    }
+
+    function startProgressBar() {
+        progressBarInterval = setInterval(updateProgressBar, 1000); // Update every second
+    }
+
+    function resetProgressBar() {
+        clearInterval(progressBarInterval);
+        progressBarInterval = null;
+        songLength = 0;
+        songProgress = 0;
+        updateLines(0);
+    }
+
+    // Update the lines based on the progress percentage
+    function updateLines(progressPercentage) {
+        const lines = document.querySelectorAll('.sw line');
+        const totalLines = lines.length;
+        const filledLines = Math.floor((progressPercentage / 100) * totalLines);
+
+        lines.forEach((line, index) => {
+            if (index < filledLines) {
+                line.classList.add('sw__full');
+            } else {
+                line.classList.remove('sw__full');
+            }
+        });
+    }
+
+    // Example: Synchronize progress bar based on server data
+    function synchronizeProgressBar(newSongProgress) {
+        songProgress = newSongProgress;
+        updateLines((songProgress / songLength) * 100);
+    }
+
+    // Listen for synchronization updates from the server
+    socket.on('updateSongProgress', function (data) {
+        synchronizeProgressBar(data.data.songProgress);
+    });
+
+
+
+</script>
+
+</html>

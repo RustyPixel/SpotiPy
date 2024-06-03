@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SpotiPy</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+
+    <style>
+        html {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        h1 {
+            font-size: 1.0em;
+        }
+
+        h2 {
+            font-size: 1.25em;
+            color: #000000;
+        }
+
+        h3 {
+            font-size: 0.75em;
+            color: #000000;
+        }
+
+        #title {
+            background-color: hsla(0, 100%, 32%, 0.25);
+            border: 0.5px dashed #0c0c0c;
+            width: 332px;
+            height: 47px;
+            margin-top: -178px;
+            margin-left: 82px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            white-space: nowrap;
+            border-radius: 6px;
+        }
+
+        .status {
+            /* border: 4px dashed green; */
+            /* background-color: gray; */
+            display: flex;
+            flex-direction: column;
+            width: 500px;
+            height: 247px;
+            padding: 2px;
+        }
+
+        .status_col {
+            /* background-color: blue; */
+            display: flex;
+            flex-direction: row;
+            width: 500px;
+            height: 247px;
+            background-repeat: no-repeat;
+            background-size: 500px 247px;
+        }
+
+        .artwork {
+            /* background-color: red; */
+            display: flex;
+            flex-direction: row;
+            padding: 4px;
+            width: 492px;
+            height: 240px;
+        }
+
+        #album_image {
+            /* border: 0.5px dashed #0c0c0c; */
+            background-color: yellow;
+            border-radius: 36px;
+            height: 238px;
+            width: 490px;
+            background-size: cover;
+            background-position: center;
+            visibility: hidden;
+            margin: 0.5px;
+            position: relative;
+            /* Add position relative */
+        }
+
+        #album_image::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.5);
+            /* Set the color and opacity */
+        }
+
+        .playin {
+            /* background-color: #00fffb; */
+            margin-top: 35px;
+            margin-left: 20px;
+            display: flex;
+            flex-direction: column;
+            padding: 2px;
+            height: 88px;
+            width: 240px;
+            /* background: rgba(240, 236, 236, 0.36); */
+            /* background behind text */
+            border-radius: 6px;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .playin div {
+            /* background-color: purple; */
+            width: 238px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .playin .song {
+            border-bottom: 0.5px dashed #ccc;
+        }
+
+        .playin .artist {
+            border-top: 0.5px dashed #ccc;
+        }
+
+        .playin div h2,
+        .playin div h3 {
+            /* animation: scrollText 12s linear infinite; */
+            animation: scrollText 12s linear 1s infinite alternate;
+        }
+
+
+        @keyframes scrollText {
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        .spotify_logo {
+            display: flex;
+            /* background-color: rgba(250, 249, 249, 0.293); */
+            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 147 147" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M73.5 0C32.9268 0 0 32.9268 0 73.5C0 114.073 32.9268 147 73.5 147C114.073 147 147 114.073 147 73.5C147 32.9268 114.073 0 73.5 0ZM103.345 108.146C102.1 108.146 101.329 107.76 100.173 107.079C81.6798 95.9353 60.1633 95.4611 38.9135 99.8177C37.7577 100.114 36.2462 100.588 35.3867 100.588C32.5119 100.588 30.704 98.3062 30.704 95.9056C30.704 92.853 32.5119 91.4008 34.7347 90.9266C59.0075 85.5623 83.8137 86.0365 104.975 98.6915C106.782 99.8474 107.849 100.885 107.849 103.582C107.849 106.279 105.745 108.146 103.345 108.146V108.146ZM111.317 88.7038C109.776 88.7038 108.738 88.0222 107.672 87.4591C89.1484 76.4933 61.5266 72.0774 36.9575 78.7458C35.5349 79.131 34.7643 79.5163 33.4306 79.5163C30.2595 79.5163 27.681 76.9379 27.681 73.7667C27.681 70.5956 29.2222 68.4913 32.2748 67.6319C40.5139 65.3202 48.9308 63.6012 61.2599 63.6012C80.4944 63.6012 99.0768 68.3728 113.718 77.0861C116.118 78.5087 117.067 80.3462 117.067 82.9246C117.037 86.1254 114.547 88.7038 111.317 88.7038V88.7038ZM120.504 66.1204C118.963 66.1204 118.015 65.7351 116.681 64.9645C95.5796 52.3687 57.8516 49.3458 33.4306 56.1623C32.3637 56.4587 31.03 56.9329 29.6075 56.9329C25.6954 56.9329 22.702 53.8802 22.702 49.9385C22.702 45.9079 25.1915 43.6258 27.8589 42.8552C38.2911 39.8026 49.9681 38.3504 62.6825 38.3504C84.3175 38.3504 106.99 42.8552 123.557 52.5169C125.869 53.8506 127.38 55.6881 127.38 59.2149C127.38 63.2456 124.12 66.1204 120.504 66.1204V66.1204Z" fill="%2320CF5E"/></svg>');
+            background-size: 30px 30px;
+            background-size: cover;
+            background-position: center;
+            margin-top: 21px;
+            margin-left: 20px;
+            width: 30px;
+            height: 30px;
+            animation: rotate 5s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 25px;
+            overflow: hidden;
+            height: 20px;
+            margin-top: 10px;
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #1ed760;
+            border-radius: 25px 0 0 25px;
+            transition: width 0.1s;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="status">
+        <div class="status_col">
+            <div>
+                <div class="artwork">
+                    <div id="album_image">
+                        <div class="spotify_logo"></div>
+                        <div class="playin">
+                            <div class="song">
+                                <h2 id="song_name">Song Name</h2>
+                            </div>
+                            <div class="artist">
+                                <h3 id="artist_name">Artist Name</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="progress-container">
+                    <div id="progress-bar"></div>
+                </div>
+                <div>
+                    <h1 id="title">Loading</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+<!-- websocket imports -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+    integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+    crossorigin="anonymous"></script>
+
+<!-- update Song -->
+<script type="text/javascript" charset="utf-8">
+    var socket = io();
+    let songLength = 0;
+    let songProgress = 0;
+    let progressBarInterval;
+
+    socket.on('connect', function () {
+        socket.emit('message', { 'room': "1" });
+    });
+
+    socket.on('updateSong', function (data) {
+        var albumImage = document.getElementById("album_image");
+        var songName = document.getElementById("song_name");
+        var artistName = document.getElementById("artist_name");
+        var title = document.getElementById("title");
+
+        if (data.data.playing) {
+            albumImage.style.backgroundImage = `url(${data.data.albumUrl})`;
+            albumImage.style.visibility = "visible";
+
+            songName.textContent = data.data.songName;
+            artistName.textContent = data.data.artistName;
+
+            title.textContent = "";
+
+            songLength = data.data.songLength;
+            songProgress = data.data.songProgress;
+
+            // Start the progress bar if not already started
+            if (!progressBarInterval) {
+                startProgressBar();
+            }
+        } else if (data.data.playing === false) {
+            albumImage.style.backgroundImage = "";
+            albumImage.style.visibility = "hidden";
+
+            songName.textContent = "";
+            artistName.textContent = "";
+            title.textContent = "Nothing is currently playing.";
+
+            resetProgressBar();
+        } else {
+            albumImage.style.backgroundImage = "";
+            albumImage.style.visibility = "hidden";
+
+            songName.textContent = "";
+            artistName.textContent = "";
+            title.textContent = "Could not get currently playing song.";
+
+            resetProgressBar();
+        }
+    });
+
+    function updateProgressBar() {
+        const progressBar = document.getElementById('progress-bar');
+        songProgress += 1000; // Increment progress by 1 second (1000 milliseconds)
+        const progressPercentage = (songProgress / songLength) * 100;
+        progressBar.style.width = `${progressPercentage}%`;
+    }
+
+    function startProgressBar() {
+        progressBarInterval = setInterval(updateProgressBar, 1000); // Update every second
+    }
+
+    function resetProgressBar() {
+        clearInterval(progressBarInterval);
+        progressBarInterval = null;
+        songLength = 0;
+        songProgress = 0;
+        document.getElementById('progress-bar').style.width = "0%";
+    }
+
+    // Example: Synchronize progress bar based on server data
+    function synchronizeProgressBar(newSongProgress) {
+        songProgress = newSongProgress;
+    }
+
+    // Listen for synchronization updates from the server
+    socket.on('updateSongProgress', function (data) {
+        synchronizeProgressBar(data.data.songProgress);
+    });
+</script>
+
+</html>

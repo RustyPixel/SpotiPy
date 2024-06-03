@@ -20,7 +20,7 @@
         }
 
         h3 {
-            font-size: 1.0em;
+            font-size: 0.85em;
             color: #17ad4edd;
         }
 
@@ -86,11 +86,11 @@
         }
 
         .playin .song {
-            border-top: 0.5px dashed #7c7b7b;
+            border-bottom: 0.5px dashed #7c7b7b;
         }
 
         .playin .artist {
-            border-bottom: 0.5px dashed #7c7b7b;
+            border-top: 0.5px dashed #7c7b7b;
         }
 
         .playin div h2,
@@ -125,11 +125,11 @@
             </div>
             <div>
                 <div class="playin">
-                    <div class="artist">
-                        <h3 id="artist_name">Artist Name</h3>
-                    </div>
                     <div class="song">
                         <h2 id="song_name">Song Name</h2>
+                    </div>
+                    <div class="artist">
+                        <h3 id="artist_name">Artist Name</h3>
                     </div>
                 </div>
             </div>
@@ -171,7 +171,7 @@
 
             songName.textContent = data.data.songName;
             artistName.textContent = data.data.artistName;
-            title.textContent = "Currently Playing:";
+            title.textContent = "";
 
             //if no song playing 
         } else if (data.data.playing == false) {

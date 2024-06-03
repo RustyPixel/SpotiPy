@@ -4,12 +4,22 @@ import logging
 from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 import os
+import threading
 
 from utilities.GetIp import get_ip  # Importing function to get IP address
 from utilities.UpdateEnv import update_env_var  # Importing function to update environment variables
 from utilities.GenerateAuthUrl import generate_auth_url  # Importing function to generate authentication URL
 from utilities.UpdateSongClass import Worker  # Importing Worker class to update song
 from utilities.UpdateAccessToken import update_access_token  # Importing function to update access token
+
+
+# Set up logging to file based on a configuration flag
+log_to_file = False  # Set to False to turn off logging to file
+
+# Set up logging to console based on a configuration flag
+log_to_console = True  # Set to False to turn off logging to console
+
+
 
 # Set up the root logger
 root_logger = logging.getLogger()
@@ -25,14 +35,8 @@ file_handler.setFormatter(formatter)
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(formatter)
 
-# Set up logging to console based on a configuration flag
-log_to_console = True  # Set to False to turn off logging to console
-
 if log_to_console:
     root_logger.addHandler(console_handler)
-
-# Set up logging to file based on a configuration flag
-log_to_file = False  # Set to False to turn off logging to file
 
 if log_to_file:
     root_logger.addHandler(file_handler)
@@ -50,7 +54,7 @@ PORT = int(os.environ.get('PORT', '8000'))
 def index():
     load_dotenv()
     if "AT" in os.environ:
-        return render_template("index.html", currentlyPlaying={})  # Render index.html template
+        return render_template(f"{os.environ.get('PLAYER_SKIN')}.html", currentlyPlaying={})  # Render index.html template
     else:
         return redirect("/auth-app")  # Redirect to authentication page if access token is not present
 
@@ -112,3 +116,4 @@ if __name__ == "__main__":
     print(f"\nhttp://{HOST}:{PORT}\n")
     threading.Thread(target=wait_for_enter).start()
     socketio.run(app, host=HOST, port=PORT)  # Run the application with SocketIO
+
